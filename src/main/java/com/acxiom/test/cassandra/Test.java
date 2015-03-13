@@ -4,6 +4,7 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.utils.UUIDs;
 
 public class Test {
 
@@ -19,13 +20,50 @@ public class Test {
 //		}
 		session.close();
 	}
+	
+	private static void createTable(String schemaName,Cluster cluster){
+		Session session = cluster.connect(schemaName);
+		session.execute("CREATE TABLE IF NOT EXISTS songs (" +
+            "id uuid PRIMARY KEY," + 
+            "title text," + 
+            "album text," + 
+            "artist text," + 
+            "tags set<text>" + 
+            ");");
+		session.close();
+	}
+	
+	private static void insertRow(String schemaName,Cluster cluster){
+		Session session = cluster.connect(schemaName);
+		session.execute("INSERT INTO songs (id, title, album, artist, tags) " +
+      "VALUES (" +
+      	  UUIDs.random().toString() + "," +
+          "'La Petite Tonkinoise'," +
+          "'Bye Bye Blackbird'," +
+          "'Joséphine Baker'," +
+          "{'jazz', '2013'})" +
+          ";");
+		session.close();
+	}
+	
+	private static void listRows(String schemaName,Cluster cluster){
+		Session session = cluster.connect(schemaName);
+		ResultSet rows = session.execute("select * from songs");
+		for(Row row:rows){
+			System.out.println("id:" + row.getUUID("id"));
+		}
+		session.close();
+	}
+	
 	public static void main(String[] args) {
 		Cluster cluster = null;
 		String schemaName = "test_keyuan";
 		try{
 			cluster = Client.getCluster("127.0.0.1");
 			createSchema(schemaName, cluster);
-			
+			createTable(schemaName, cluster);
+			insertRow(schemaName, cluster);
+			listRows(schemaName, cluster);
 			
 			
 		}finally{
