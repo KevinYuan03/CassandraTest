@@ -6,7 +6,7 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.utils.UUIDs;
 
-public class Test {
+public class CQLTest {
 
 	private static void createSchema(String schemaName,Cluster cluster){
 		Session session = cluster.connect();
